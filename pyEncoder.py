@@ -7,7 +7,7 @@ import shutil
 from lib.pymediainfo import MediaInfo
 from lib.name_parser.parser import NameParser, InvalidNameException
 from lib.tvdb_api.tvdb_api import Tvdb
-
+import lib.pyencoder.helper as helper
 
 
 # depends: ffmpeg, mediainfo CLI, python 2.7
@@ -185,33 +185,8 @@ def test():
                 if (moved == True):
                     del moved
                 else:
-                    move_to_manual(datei, "no language found")            
+                    helper.move_to_manual(datei, "no language found")            
     run_ffmpeg()
-
-def move_to_manual(file, becauseof):
-    os.chdir(hotfolder)
-    datei2="manual_process/" + file
-    if not os.path.exists("manual_process"):
-        os.makedirs("manual_process")
-    os.rename(file, datei2)
-    logging.info("Moved " + file + " to manual_process Folder! --- " + becauseof)
-
-def move_when_finished(file):
-    os.chdir(hotfolder)
-    datei2="Converted/" + file
-    #newfilename with tvdb stuff? not rlly for repacking -.-
-    if not os.path.exists("Converted"):
-        os.makedirs("Converted")
-    os.rename(file, datei2)
-    logging.info("DONE: " + file + " was moved to Converted Folder!")
-    
-def move_source(file):
-    os.chdir(hotfolder)
-    datei2="BACKUP/" + file
-    if not os.path.exists("BACKUP"):
-        os.makedirs("BACKUP")
-    os.rename(file, datei2)
-    logging.info("BACKUP: " + file + " was moved to BACKUP Folder!")
 
 def run_ffmpeg():
     conn = connect(pyEncoder + 'pyEncoder.db')
@@ -273,9 +248,9 @@ def run_ffmpeg():
             
             #fake the transcoding for tests...
             #shutil.copy (datei, newfilename)
-            move_when_finished(newfilename)
+            helper.move_when_finished(newfilename)
             if (keep_source == True):
-                move_source(datei)
+                helper.move_source(datei)
             else:
                 os.remove(datei)
                 logging.info("Source File: " + datei + " DELETED!")
