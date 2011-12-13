@@ -7,6 +7,7 @@ import shutil
 from lib.pymediainfo import MediaInfo
 from lib.name_parser.parser import NameParser, InvalidNameException
 from lib.tvdb_api.tvdb_api import Tvdb
+from ConfigParser import SafeConfigParser
 import lib.pyencoder.helper as helper
 
 
@@ -30,8 +31,6 @@ video_height_need=720
 hotfolder="/Volumes/Media/Series/"
 #which kind of media files should be processed
 media_types = ['.avi','.mkv','.mp4','.wmv', '.mov'] 
-#Path to pyEncoder NEEDS ending "/"
-pyEncoder="/Users/cytec/pyEncoder/"
 #Time to whait bevore next Scan of hotfolder in MINUTES
 sleeptime=1
 #Possible values: DEBUG, INFO, ERROR
@@ -56,13 +55,24 @@ video_bitrate_need=""
 audio_bitrate_need=""
 audio_codec_need=""
 
+#get the absolute path to pyEncoder...
+path = os.path.abspath(__file__)
+pyEncoder = os.path.dirname(path)
+
+
+#loadConfig
+
+parser = SafeConfigParser()
+parser.read('pyEncoder.ini')
+test = parser.get('video_settings', 'reconvert_all')
 
 
 #### Logging functions
+loglevel = parser.get('global', 'loglevel')
 
 logging.basicConfig( 
     filename=pyEncoder + "pyEncoder.log",  
-    level = logging.DEBUG, 
+    level = logging.DEBUG,
     format = "%(asctime)s %(levelname)s: %(message)s", 
     datefmt = "%d.%m.%Y %H:%M:%S") 
     
@@ -74,7 +84,10 @@ def test():
     conn = connect(pyEncoder + "pyEncoder.db")
     curs = conn.cursor()
     logging.debug("Connecting to sqlite Database: pyEncoder.db")
-    os.chdir(hotfolder) #go to folder
+    try:
+        os.chdir(hotfolder) #go to folder
+    except:
+        logging.error("Can't find Hotfolder in " + hotfolder)
     dir_content=os.listdir(hotfolder) #get content of folder
     logging.debug("Scanning " + hotfolder + " for MediaFiles")
     for datei in dir_content:
@@ -142,7 +155,7 @@ def test():
                     logging.info("Checking video height for" + datei)
                     if (track.height < video_height_need):
                         logging.error("Video height is " + str(track.height) + " we need " + str(video_height_need))
-                        move_to_manual(datei, "resolution to small")
+                        helper.move_to_manual(datei, "resolution to small")
                         moved=True
                         break
                     else:
@@ -243,16 +256,19 @@ def run_ffmpeg():
             newfilename=filename + ".mp4"
             #use atomicparsly to set metadatas...
             
-            #os.popen(pyEncoder + "lib/AtomicParsley " + newfilename + "--title " + pipes.quote(epname) + " --description "  " --stik 'TV Show' " + " --TVNetwork " + " --TVShowName " + " --TVEpisode " + " --TVSeasonNum " + " --TVEpisodeNum " + " --genre" + " --overWrite")
+            #os.popen(pyEncoder + "lib/tools/AtomicParsley " + newfilename + "--title " + pipes.quote(epname) + " --description "  " --stik 'TV Show' " + " --TVNetwork " + " --TVShowName " + " --TVEpisode " + " --TVSeasonNum " + " --TVEpisodeNum " + " --genre" + " --overWrite")
             
             
             #fake the transcoding for tests...
             #shutil.copy (datei, newfilename)
-            helper.move_when_finished(newfilename)
+            move_when_finished(newfilename)
             if (keep_source == True):
                 helper.move_source(datei)
             else:
-                os.remove(datei)
+                try:
+                    os.remove(datei)
+                except:
+                    logging.error("Can't delete " + file)
                 logging.info("Source File: " + datei + " DELETED!")
             conn.commit()
     #time.sleep(sleeptime*60)
