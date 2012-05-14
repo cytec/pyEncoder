@@ -77,6 +77,8 @@ logging.basicConfig(
     datefmt = "%d.%m.%Y %H:%M:%S") 
     
 
+def getMediaInfo(folder, file):
+    media_info = MediaInfo.parse(datei)
 
 
 def test():

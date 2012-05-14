@@ -1,0 +1,76 @@
+pyEncoder DB
+
+Table WATCH:
+
+NAME:			TYPE:		KOMMENT:
+======================================================
+folder			TEXT		absolute watchfolderpath 
+abitrate		NUMERIC		bsp: 1631000 (1631kb/s)
+vbitrate		NUMERIC		bsp: 448000	(448k)
+acodedc			TEXT		ac3, mp3, mp2, dts, acc ... 
+vcodec			TEXT		h264, divx, webm, flv ...
+achannels		NUMERIC		2, 4, 5, 6
+width			NUMERIC		1280
+height			NUMERIC		720
+allaudio		NUMERIC		1/0
+germanfirst		NUMERIC 	1/0 alternativ: firstaudio TEXT 
+subtitles		NUMERIC		1/0
+move			NUMERIC		1/0
+moveto			TEXT		absolute pfad zum ordner
+delete			NUMERIC		1/0
+addmeta			NUMERIC		1/0 metadaten hinzufuegen (SxxExx, EPTitel etc)
+appletv			NUMERIC		1/0	vordefinierte appletv settings benutzen
+appletvaddon	NUMERIC		1/0 ZUSAETZLICH ein appletv version erstellen
+
+#evtl in die general config auslagern?
+
+interval		NUMERIC		scan interval fuer den watchfolder in MINUTEN
+rename			NUMERIC		1/0 umbenennen nach konvert (titel.videohoehe.videocodec.audiocodec.audiosprachen.subtitlesprachen.mkv) bsp: My.Movie.720p.x264.ac3.german.englisch.gersubs.mkv
+scenerename		NUMERIC		1/0	versucht die scene rules einzuhalten... (TITLE.720p.x264.GERMAN.GERSUBS.mkv)
+usehyphens		NUMERIC		1/0	benutzte "-" anstelle von "." (TITLE-720p-x264-GERMAN-GERSUBS.mkv)
+
+
+TABLE - CONVERT:
+
+NAME:			TYPE:		KOMMENT:
+======================================================
+folder			TEXT		welcher watchfolder?
+filename		TEXT		datei name
+title 			TEXT		titel der datei (tvdb bzw mediainfo)
+acodec 			TEXT		audiocodec der datei
+vcodec 			TEXT		videocodec der datei
+abitrate		NUMERIC		
+vbitrate		NUMERIC 	
+achannels		NUMERIC	
+atracks			NUMERIC		Anzahl der audio spuren
+subtitles 		NUMERIC		1/0
+series			NUMERIC		1/0
+
+### meta infos
+epname 			TEXT		Name der Episode von tvdb.com
+season			NUMERIC		02
+episode 		NUMERIC		05
+plot			LONGTEXT	Inhaltsbeschreibung der Episode
+
+done			NUMERIC		erledigt?
+outputname		TEXT		Name der convertierten datei bsp: TITLE.720p.x264.GERMAN.GERSUBS.mkv
+
+CONVERT table ist dafuer zustaendig, dass keine datei 2mal convertiert wird. es wird der dateiname sowie der ausgabedateiname gespeichert und beim naechsten scan werden alle files mit GENAU diesen 2 Namen ignoriert. (Zusaetzliche sicherheit wenn user move und delete deaktiviert hat)
+
+Video informationen werden mit der watch tabelle und dem entsprechenden watchfolder abgeglichen, audio wird NUR konvertiert wenn 
+1. Bitrate hoeher als angegeben ist 
+UND/ODER
+2. codec "hoeher" als angegeben ist
+
+audio codec staffelungen:
+quality		codec
+0 			noaudio/ogg
+1 			mp3
+2			mp2
+3			aac
+4			ac3
+5			dts
+
+video bitrate wird NUR geaendert wenn diese hoeher ist als die angegebene, prinzipiell gilt: keine angabe = keine aenderung, wird also kein video codec angegeben wird dieser uebernommen, ebenso bitrate, acodec, achannels etc. 
+
+
