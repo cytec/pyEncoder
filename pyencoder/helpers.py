@@ -141,5 +141,10 @@ def rename_file(old_path, new_name):
 
     return new_path
 
-def generate_config()
+#use os.walk to process subdirs as well
+def scanFolder(foldername):
+    for root, dirs, files in os.walk(foldername):
+        for file in files:
+            #print root + "/" + file
+            isMediaFile(file)
 
