@@ -143,8 +143,15 @@ def rename_file(old_path, new_name):
 
 #use os.walk to process subdirs as well
 def scanFolder(foldername):
+    
+    allfiles = []
+    
     for root, dirs, files in os.walk(foldername):
         for file in files:
-            #print root + "/" + file
-            isMediaFile(file)
+            file = os.path.join(root, file)
+            
+            if isMediaFile(file):
+                   allfiles.append(file)
+                   
+    return allfiles
 
